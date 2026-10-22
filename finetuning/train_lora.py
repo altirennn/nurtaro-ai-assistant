@@ -27,6 +27,7 @@ def main() -> None:
         from datasets import Dataset
         from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
         from transformers import AutoModelForCausalLM, AutoTokenizer, DataCollatorForSeq2Seq, Trainer, TrainingArguments
+        from finetuning.prompting import build_messages
     except ImportError as exc:
         raise SystemExit("Install finetuning dependencies: pip install -r requirements-finetuning.txt") from exc
 
@@ -81,8 +82,11 @@ def main() -> None:
         raise SystemExit("No validation examples found in dataset split")
 
     def tokenize(row):
-        prompt = f"### Инструкция\n{row['instruction']}\n### Контекст\nЯзык: {row['language']}. {row['input']}\n### Ответ\n"
-        prompt_ids = tokenizer(prompt, add_special_tokens=False)["input_ids"]
+        prompt_ids = tokenizer.apply_chat_template(
+            build_messages(row["instruction"], row["input"], row["language"]),
+            tokenize=True,
+            add_generation_prompt=True,
+        )
         answer_ids = tokenizer(row["output"].strip() + tokenizer.eos_token, add_special_tokens=False)["input_ids"]
         if len(prompt_ids) >= args.max_length:
             prompt_ids = prompt_ids[-(args.max_length - 1):]
@@ -136,6 +140,7 @@ def main() -> None:
     metadata = {
         "base_model": args.model_id or args.base_model,
         "adapter_type": "QLoRA 4-bit NF4" if args.qlora else "LoRA",
+        "prompt_format": "base tokenizer chat template with bilingual safety system prompt",
         "dataset": dataset_label, "dataset_splits": split_counts, "training_examples": len(train_dataset),
         "training_ran": True, "validation_loss_metrics": validation_metrics,
         "training_log_history": trainer.state.log_history,

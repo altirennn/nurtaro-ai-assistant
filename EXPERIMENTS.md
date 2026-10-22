@@ -18,7 +18,7 @@
 | Средняя / p95 latency | 7.81 / 10.17 ms на локальном CPU, 32 in-process запроса; не production benchmark |
 | Измерения | Retrieval, evidence phrase recall proxy, abstention, стабильность и latency |
 | Unit/integration tests | 15 passed на Python 3.13 |
-| LoRA/QLoRA | Выполнен один QLoRA запуск; validation loss 2.4635; адаптер и holdout отчёт сохранены в `finetuning/results/qwen-qlora/` |
+| LoRA/QLoRA | Выполнен QLoRA запуск с native chat template; validation loss 2.3581; адаптер и holdout отчёт сохранены в `finetuning/results/qwen-qlora/` |
 | Среда для обучения | Windows, Python 3.13.0, PyTorch 2.12.0+cu130, Transformers 4.57.6, PEFT 0.21.2, Datasets 4.8.5, Accelerate 1.15.0, bitsandbytes 0.50.2; RTX 3050 Laptop GPU, 4 GiB |
 | Ручная педагогическая проверка | Не выполнена |
 
@@ -26,14 +26,14 @@
 
 `finetuning/examples.jsonl` содержит 28 коротких синтетических RU/KK примеров: 16 train, 4 validation, 8 test. `python -m finetuning.prepare_data` проверяет схему, split и повторяющиеся prompts. Тренировочный скрипт обучается только на train и сохраняет validation loss и trainer logs. `python -m finetuning.evaluate_adapter` сравнивает base/adapter на test по exact expected-term recall и abstention markers. Эти метрики — автоматические proxies; они не оценивают полезность ответа носителем языка.
 
-Запуск от 2026-10-22: [Qwen/Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct), revision `7ae557604adf67be50417f59c2c2f167def9a775`, QLoRA 4-bit NF4, LoRA rank 8 / alpha 16 / dropout 0.05, sequence length 128, batch size 1, gradient accumulation 8, learning rate 2e-4, 1 epoch и 2 optimizer steps. Тренировка заняла 11.57 секунды; это время trainer steps без загрузки модели. Адаптер занимает 17,640,136 байт и приложен в репозитории. Точный конфиг и логи лежат в `finetuning/results/qwen-qlora/training_metadata.json`.
+Запуск от 2026-10-22: [Qwen/Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct), revision `7ae557604adf67be50417f59c2c2f167def9a775`, QLoRA 4-bit NF4, LoRA rank 8 / alpha 16 / dropout 0.05, родной chat template токенизатора, sequence length 256, batch size 1, gradient accumulation 8, learning rate 2e-4, 1 epoch и 2 optimizer steps. Trainer занял 11.87 секунды без загрузки модели; validation loss — 2.3581. Адаптер занимает 17,640,136 байт и приложен в репозитории. Точный конфиг и логи лежат в `finetuning/results/qwen-qlora/training_metadata.json`.
 
-| Holdout proxy, 8 синтетических примеров, max 48 новых токенов | Base | QLoRA |
+| Holdout proxy, 8 синтетических примеров, max 96 новых токенов | Base | QLoRA |
 |---|---:|---:|
-| Exact expected-term recall | 0.1250 | 0.0833 |
+| Exact expected-term recall | 0.0833 | 0.0833 |
 | Abstention behavior accuracy | 0.7500 | 0.7500 |
 
-Этот запуск **не улучшил** выбранные прокси. В просмотренных ответах модель спутала задачу с посторонними темами, выдала бессмысленный текст на казахском и не воздержалась на вопросе о лечении температуры: обе версии придумали порог 37.5 °C, которого нет в данных. Не используйте этот адаптер для родительских ответов, медицинских запросов или демонстрации как готового качества. Результат показывает, что pipeline обучает и сохраняет adapter, а короткого синтетического корпуса недостаточно; нужна экспертная bilingual разметка, больше данных и ручная слепая оценка.
+Этот запуск **не улучшил** выбранные прокси. Base выдал неподтверждённые рекомендации по снижению температуры; adapter на этом кейсе ответил только «Обратитесь к врачу», но не прошёл заданную проверку отказа. Несколько казахских ответов обеих версий бессвязны или не по теме. Не используйте этот адаптер для родительских ответов, медицинских запросов или демонстрации как готового качества. Нужна экспертная bilingual разметка, больше данных и ручная слепая оценка.
 
 `finetuning/results/qwen-qlora/adapter-evaluation.json` сохраняет сырые base/adapter ответы. `adapter_config.json` указывает на открытый базовый model ID; базовые веса не включены. Проведённый run использовал локальный кэш Hugging Face, а не абсолютный путь из машины разработчика.
 

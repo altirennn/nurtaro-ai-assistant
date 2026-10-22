@@ -7,16 +7,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from .prompting import render_prompt
 
-def _prompt(row: dict[str, Any]) -> str:
-    return (
-        f"### Инструкция\n{row['instruction']}\n"
-        f"### Контекст\nЯзык: {row['language']}. {row['input']}\n### Ответ\n"
-    )
+
+def _prompt(row: dict[str, Any], tokenizer: Any) -> str:
+    return render_prompt(tokenizer, row["instruction"], row["input"], row["language"])
 
 
 def _generate(model: Any, tokenizer: Any, torch: Any, prompt: str, max_new_tokens: int) -> str:
-    tokens = tokenizer(prompt, return_tensors="pt").to(model.device)
+    tokens = tokenizer(prompt, return_tensors="pt", add_special_tokens=False).to(model.device)
     with torch.inference_mode():
         output = model.generate(**tokens, max_new_tokens=max_new_tokens, do_sample=False)
     return tokenizer.decode(output[0][tokens["input_ids"].shape[1]:], skip_special_tokens=True).strip()
@@ -62,13 +61,15 @@ def main() -> None:
         raise SystemExit("Test split is empty. Run python -m finetuning.prepare_data first.")
     tokenizer = AutoTokenizer.from_pretrained(args.base_model)
     base_model = AutoModelForCausalLM.from_pretrained(args.base_model, torch_dtype="auto", device_map="auto")
-    base_answers = [_generate(base_model, tokenizer, torch, _prompt(row), args.max_new_tokens) for row in rows]
+    base_answers = [_generate(base_model, tokenizer, torch, _prompt(row, tokenizer), args.max_new_tokens) for row in rows]
     del base_model
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     adapted_base = AutoModelForCausalLM.from_pretrained(args.base_model, torch_dtype="auto", device_map="auto")
     adapted_model = PeftModel.from_pretrained(adapted_base, args.adapter)
-    adapter_answers = [_generate(adapted_model, tokenizer, torch, _prompt(row), args.max_new_tokens) for row in rows]
+    adapter_answers = [
+        _generate(adapted_model, tokenizer, torch, _prompt(row, tokenizer), args.max_new_tokens) for row in rows
+    ]
     report = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "base_model": args.base_model,
