@@ -17,5 +17,5 @@ jobs:
           cache-dependency-path: requirements-dev.txt
       - run: python -m pip install -r requirements-dev.txt
       - run: python -m compileall -q app evaluation finetuning tests
-      - run: pytest tests -q -p no:cacheprovider -p no:tmpdir
+      - run: python -m pytest tests -q -p no:cacheprovider -p no:tmpdir
       - run: python -m evaluation.run_eval
