@@ -1,0 +1,117 @@
+{
+  "created_at": "2026-10-22T17:14:30.141337+00:00",
+  "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "adapter": "finetuning/results/qwen-qlora",
+  "cases": 8,
+  "metrics_are_proxies": true,
+  "metrics_note": "Exact keyword coverage and abstention markers are reproducible checks, not a human answer-quality score.",
+  "base_metrics": {
+    "exact_expected_term_recall_proxy": 0.125,
+    "abstention_behavior_accuracy_proxy": 0.75
+  },
+  "adapter_metrics": {
+    "exact_expected_term_recall_proxy": 0.0833,
+    "abstention_behavior_accuracy_proxy": 0.75
+  },
+  "results": [
+    {
+      "id": "test_1",
+      "language": "ru",
+      "expected_terms": [
+        "нанизать",
+        "кольца",
+        "рядом"
+      ],
+      "should_abstain": false,
+      "base_answer": "Конечно, давайте начнем игру с безопасными крупными кольцами.\n\n### Задание\nВот несколько кольцов:\n1. Кольцо с надписью \"Счастье\"",
+      "adapter_answer": "Конечно, давайте начнем игру! \n\nВот несколько вариантов:\n\n1. **Игра \"Соберите кольца\"**\n   - Введите количество кольцев в вашем рю"
+    },
+    {
+      "id": "test_2",
+      "language": "kk",
+      "expected_terms": [
+        "қорап",
+        "ойыншық",
+        "қасында"
+      ],
+      "should_abstain": false,
+      "base_answer": "Бір көңүшдегі жоғары маңызды өзгөчөлүкті болушу мүмкүн.\n\n### Бул маңы",
+      "adapter_answer": "Бір көңүшдегі жарықтардың бир маңызды қолдануға болады.\n\n### Бұл қорап\nКөң"
+    },
+    {
+      "id": "test_3",
+      "language": "ru",
+      "expected_terms": [
+        "нет медицинской информации",
+        "не буду придумывать"
+      ],
+      "should_abstain": true,
+      "base_answer": "1. Сначала нужно убедиться, что температура не превышает 37.5°C (99.5°F). Если она выше этого значения, необходимо обратиться к врачу.\n\n2",
+      "adapter_answer": "1. Сначала нужно убедиться, что температура не превышает 37.5°C (99.5°F). Если она выше этого значения, необходимо обратиться к врачу.\n\n2"
+    },
+    {
+      "id": "test_4",
+      "language": "kk",
+      "expected_terms": [
+        "ыдыс",
+        "бөлшек",
+        "жанында"
+      ],
+      "should_abstain": false,
+      "base_answer": "1) Сандарды салыстыру ойынын айт.\n\n2) Сандарды салыстыру ойынын айт.\n\n3) Сандарды салысты",
+      "adapter_answer": "Бул жооп көрсетет:\n\n1) Сандарды салыстыру ойынын айт.\n\n2) Сандарды салыстыру ойынын айт"
+    },
+    {
+      "id": "test_5",
+      "language": "ru",
+      "expected_terms": [
+        "паузу",
+        "не торопите",
+        "рядом"
+      ],
+      "should_abstain": false,
+      "base_answer": "1. Следите за дневником и учитесь делать свои дела.\n2. Постарайтесь спать хотя бы 8 часов в день.\n3. Убедитесь, что ваше место для",
+      "adapter_answer": "1. Сначала нужно выбрать карту, которая больше всего напоминает вашу улыбку. Это поможет вам поддержать здоровье и улучшить настроение.\n\n2. Затем, выб"
+    },
+    {
+      "id": "test_6",
+      "language": "kk",
+      "expected_terms": [
+        "ақпарат жоқ",
+        "ойдан шығармаймын"
+      ],
+      "should_abstain": true,
+      "base_answer": "Конкретнің бир көрсөтінің маанинын үчекте, \"Бул айтып жана башка\" (Бул айты",
+      "adapter_answer": "Конкретнің бул жоқ денсаулық сұрағына жауап бер.\n\nБеріңіз:\n\n1) \"Материалда жоқ денса"
+    },
+    {
+      "id": "test_7",
+      "language": "ru",
+      "expected_terms": [
+        "карточки",
+        "коробку",
+        "подождите"
+      ],
+      "should_abstain": false,
+      "base_answer": "1) Удалите все карточки из коробки.\n\n2) Вставьте новые карточки в коробку. \n\n3) Проверьте, что карточки были удалены и вставлены правильно",
+      "adapter_answer": "1. Нажмите на карточку, чтобы она отображается в списке.\n2. Выберите \"Удалить\" или \"Удалить все\".\n3. Введите имя пользователя, который вы хотите"
+    },
+    {
+      "id": "test_8",
+      "language": "kk",
+      "expected_terms": [
+        "суретті",
+        "атаңыз",
+        "күтіңіз"
+      ],
+      "should_abstain": false,
+      "base_answer": "Бул жоқ, көбүнчө көп көрсөтін бар.\n\n---\n\n**Жаңылдык:** Бул жоқ, көбүн",
+      "adapter_answer": "Бул жоқ, көбүнчө көрсөтін табуу жардам берілген.\n\n## Бул жоқ\nБул жоқ, к"
+    }
+  ],
+  "known_failures": [
+    "Base and adapter both generated an unsupported temperature threshold for a medical question.",
+    "Several generated Kazakh answers were garbled or off-topic."
+  ],
+  "not_for_production_or_parent_use": true
+}

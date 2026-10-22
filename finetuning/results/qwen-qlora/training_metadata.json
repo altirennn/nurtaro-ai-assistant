@@ -1,0 +1,97 @@
+{
+  "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "adapter_type": "QLoRA 4-bit NF4",
+  "dataset": "finetuning/examples.jsonl (prepared JSONL split 16/4/8)",
+  "dataset_splits": {
+    "train": 16,
+    "validation": 4,
+    "test": 8
+  },
+  "training_examples": 16,
+  "training_ran": true,
+  "validation_loss_metrics": {
+    "eval_loss": 2.4634506702423096,
+    "eval_runtime": 0.4049,
+    "eval_samples_per_second": 9.878,
+    "eval_steps_per_second": 2.469,
+    "epoch": 1.0
+  },
+  "training_log_history": [
+    {
+      "loss": 2.6908,
+      "grad_norm": 2.8317179679870605,
+      "learning_rate": 0.0002,
+      "epoch": 0.5,
+      "step": 1
+    },
+    {
+      "loss": 2.5297,
+      "grad_norm": 2.47857928276062,
+      "learning_rate": 0.0001,
+      "epoch": 1.0,
+      "step": 2
+    },
+    {
+      "train_runtime": 11.5746,
+      "train_samples_per_second": 1.382,
+      "train_steps_per_second": 0.173,
+      "total_flos": 4128014479104.0,
+      "train_loss": 2.6102631092071533,
+      "epoch": 1.0,
+      "step": 2
+    },
+    {
+      "eval_loss": 2.4634506702423096,
+      "eval_runtime": 0.4049,
+      "eval_samples_per_second": 9.878,
+      "eval_steps_per_second": 2.469,
+      "epoch": 1.0,
+      "step": 2
+    }
+  ],
+  "base_model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "base_model_load": "local Hugging Face cache snapshot; local path omitted",
+  "measured_at_utc": "2026-10-22T17:17:23.276140+00:00",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "vram_bytes": 4294443008,
+    "cuda_wheel": "13.0"
+  },
+  "software": {
+    "python": "3.13.0",
+    "torch": "2.12.0+cu130",
+    "transformers": "4.57.6",
+    "peft": "0.21.2",
+    "datasets": "4.8.5",
+    "accelerate": "1.15.0",
+    "bitsandbytes": "0.50.2"
+  },
+  "training_parameters": {
+    "epochs": 1,
+    "optimizer_steps": 2,
+    "max_sequence_length": 128,
+    "batch_size": 1,
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 0.0002,
+    "lora_rank": 8,
+    "lora_alpha": 16,
+    "lora_dropout": 0.05,
+    "quantization": "4-bit NF4 with double quantization",
+    "trainer_runtime_seconds": 11.5746
+  },
+  "adapter_size_bytes": 17640136,
+  "evaluation": {
+    "test_examples": 8,
+    "max_new_tokens": 48,
+    "base_metrics": {
+      "exact_expected_term_recall_proxy": 0.125,
+      "abstention_behavior_accuracy_proxy": 0.75
+    },
+    "adapter_metrics": {
+      "exact_expected_term_recall_proxy": 0.0833,
+      "abstention_behavior_accuracy_proxy": 0.75
+    },
+    "quality_improved": false
+  },
+  "source_dataset_sha256": "f3c33dbb5b5ed0f3c058b4693b470375a503ac4e72755f871b1a04d64f0d3fbf"
+}

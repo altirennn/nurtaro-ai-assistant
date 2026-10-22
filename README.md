@@ -156,7 +156,7 @@ Evaluation содержит 32 вопроса: 16 русских и 16 каза�
 
 Текущий локальный reference run `20261022T161904Z` на Python 3.13: expected document hit 1.00, MRR 0.9833, evidence phrase recall proxy 1.00, language/abstention accuracy 1.00, стабильность 1.00; средняя latency 7.81 ms и p95 10.17 ms. Это маленький синтетический набор без оценки носителем языка и не прогноз production качества.
 
-Реальные метрики fine-tuning не приведены: обучение не запускалось и adapter не сохранён. В среде видна RTX 3050 Laptop GPU с 4 GiB, но доступный PyTorch не видит CUDA, а Transformers/PEFT/Datasets не установлены. Метрики CV также не приведены: YOLO pipeline есть, но нет лицензированного размеченного набора целевых видео. Evaluation не вызывает внешнюю LLM по умолчанию. Для сравнения того же настроенного генератора с retrieved context и без него используйте `python -m evaluation.run_eval --with-configured-model`; это до 62 вызовов для набора из 32 кейсов и может расходовать квоту endpoint.
+QLoRA фактически обучен на RTX 3050 Laptop GPU; результаты и ограничения опубликованы в [EXPERIMENTS.md](EXPERIMENTS.md), адаптер сохранён в `finetuning/results/qwen-qlora/`. На 8 синтетических holdout-кейсах exact-term recall proxy снизился с 0.125 до 0.0833, а abstention proxy остался 0.75. Это отрицательный результат маленького учебного запуска, а не доказательство качества модели. CV-код есть, но inference на лицензированном целевом видеонаборе и его метрики пока не проверялись. Evaluation не вызывает внешнюю LLM по умолчанию. Для сравнения того же настроенного генератора с retrieved context и без него используйте `python -m evaluation.run_eval --with-configured-model`; это до 62 вызовов для набора из 32 кейсов и может расходовать квоту endpoint.
 
 ## LoRA / QLoRA pipeline
 
@@ -165,16 +165,17 @@ Evaluation содержит 32 вопроса: 16 русских и 16 каза�
 ```bash
 python -m pip install -r finetuning/requirements-finetuning.txt
 python -m finetuning.prepare_data
-python -m finetuning.train_lora --base-model Qwen/Qwen2.5-0.5B-Instruct --epochs 1
+python -m finetuning.train_lora --base-model Qwen/Qwen2.5-0.5B-Instruct --epochs 1 --max-length 128
 # QLoRA требует совместимую CUDA GPU и bitsandbytes:
+# Сначала установите CUDA-сборку PyTorch для своего драйвера/ОС, затем зависимости QLoRA.
 python -m pip install -r finetuning/requirements-qlora.txt
-python -m finetuning.train_lora --base-model Qwen/Qwen2.5-0.5B-Instruct --qlora
-python -m finetuning.load_adapter --base-model Qwen/Qwen2.5-0.5B-Instruct --adapter finetuning/artifacts/qwen-lora --prompt "Предложи игру с книгой."
-python -m finetuning.compare_base_adapter --base-model Qwen/Qwen2.5-0.5B-Instruct --adapter finetuning/artifacts/qwen-lora
-python -m finetuning.evaluate_adapter --base-model Qwen/Qwen2.5-0.5B-Instruct --adapter finetuning/artifacts/qwen-lora
+python -m finetuning.train_lora --base-model Qwen/Qwen2.5-0.5B-Instruct --model-id Qwen/Qwen2.5-0.5B-Instruct --epochs 1 --max-length 128 --qlora --output-dir finetuning/artifacts/qwen-qlora
+python -m finetuning.load_adapter --base-model Qwen/Qwen2.5-0.5B-Instruct --adapter finetuning/artifacts/qwen-qlora --prompt "Предложи игру с книгой."
+python -m finetuning.compare_base_adapter --base-model Qwen/Qwen2.5-0.5B-Instruct --adapter finetuning/artifacts/qwen-qlora
+python -m finetuning.evaluate_adapter --base-model Qwen/Qwen2.5-0.5B-Instruct --adapter finetuning/artifacts/qwen-qlora
 ```
 
-Запуск использует только `train`, считает validation loss, а `evaluate_adapter` сравнивает ответы base/adapter на 8 отложенных RU/KK примерах по точному совпадению заданных понятий и маркерам отказа. Это маленькие автоматические прокси, а не ручная оценка ответа. Датасет синтетический и создан для демонстрации pipeline; это не экспертный корпус и не показатель качества для production. Артефакты обучения игнорируются Git. В этом окружении обучение не запускалось, поэтому реального validation loss, adapter и holdout-результата пока нет.
+Запуск использует только `train`, считает validation loss, а `evaluate_adapter` сравнивает ответы base/adapter на 8 отложенных RU/KK примерах по точному совпадению заданных понятий и маркерам отказа. Это маленькие автоматические прокси, а не ручная оценка ответа. Датасет синтетический и создан для демонстрации pipeline; это не экспертный корпус и не показатель качества для production. Основные временные файлы находятся в игнорируемой `finetuning/artifacts/`; компактный adapter и отчёты эксперимента сохранены в `finetuning/results/qwen-qlora/`.
 
 ## Документация
 

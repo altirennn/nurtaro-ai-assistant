@@ -79,9 +79,15 @@ def main() -> None:
         "base_metrics": _score(rows, base_answers),
         "adapter_metrics": _score(rows, adapter_answers),
         "results": [
-            {"id": row["id"], "language": row["language"], "expected_terms": row["expected_terms"],
-             "should_abstain": row["should_abstain"], "base_answer": base, "adapter_answer": adapted}
-            for row, base, adapted in zip(rows, base_answers, adapter_answers)
+            {
+                "id": row.get("id", f"test_{index + 1}"),
+                "language": row["language"],
+                "expected_terms": row["expected_terms"],
+                "should_abstain": row["should_abstain"],
+                "base_answer": base,
+                "adapter_answer": adapted,
+            }
+            for index, (row, base, adapted) in enumerate(zip(rows, base_answers, adapter_answers))
         ],
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
