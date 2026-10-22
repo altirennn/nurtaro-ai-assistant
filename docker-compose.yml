@@ -1,0 +1,38 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      API_KEYS: ${API_KEYS:?Set API_KEYS in .env}
+      BOT_PRINCIPAL: ${BOT_PRINCIPAL:-telegram-bot}
+      DATABASE_PATH: /app/data/nurtaro.sqlite3
+      LLM_PROVIDER: ${LLM_PROVIDER:-extractive}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b-instruct-q4_K_M}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.2}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-512}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-45}
+      EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-hashing}
+      TOP_K: ${TOP_K:-4}
+      MIN_RETRIEVAL_SCORE: ${MIN_RETRIEVAL_SCORE:-0.08}
+    volumes:
+      - nurtaro-data:/app/data
+    restart: unless-stopped
+
+  telegram-bot:
+    build: .
+    command: ["python", "-m", "app.bot.telegram_bot"]
+    profiles: ["telegram"]
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      BOT_API_KEY: ${BOT_API_KEY:-}
+      API_BASE_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  nurtaro-data:
+

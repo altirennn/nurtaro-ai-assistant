@@ -1,0 +1,4 @@
+# Optional computer-vision dependencies; install separately from the lightweight API requirements.
+# Install the PyTorch wheel matching your OS/CUDA first if GPU inference is required.
+opencv-python-headless>=4.10,<5.0
+ultralytics>=8.3,<9.0

@@ -1,0 +1,3 @@
+-r requirements-finetuning.txt
+# Install a build compatible with the host's CUDA runtime.
+bitsandbytes>=0.44,<1.0

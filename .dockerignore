@@ -1,0 +1,12 @@
+.git
+.venv
+.env
+__pycache__
+.pytest_cache
+.pytest-temp
+pytest-cache-files-*
+*.pyc
+data/*.sqlite3
+evaluation/results.json
+evaluation/results.csv
+finetuning/artifacts
